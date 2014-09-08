@@ -191,7 +191,11 @@
         Ext.Object.each(parent_items,function(oid,parent){
             var type = parent.get('_type');
             var children_fields = this._getChildrenFieldsFor(type);
-
+            
+            if ( type == "testcase" ) {
+                promises.push(this._fetchChildrenForParent('defect',parent)); 
+            }
+            
             if ( children_fields ) {
                 Ext.Array.each(children_fields,function(children_field) {
                     promises.push(this._fetchCollection(parent,children_field));
@@ -218,6 +222,35 @@
             this.logger.log("resolving _fetchChildItems");
             deferred.resolve(fetched_items);
         }
+        return deferred.promise;
+    },
+    _fetchChildrenForParent:function(child_type,parent) {
+        var connection_field = this._getAssociationFieldFor(child_type,parent.get('_type'));
+        var filters = [{
+            property:connection_field + ".ObjectID",
+            value: parent.get('ObjectID')
+        }];
+        
+        var deferred = Ext.create('Deft.Deferred');
+        Ext.create('Rally.data.wsapi.Store', {
+            autoLoad: true,
+            model: child_type,
+            fetch: this._getFetchNames(),
+            filters: filters,
+            context: {
+                project: null
+            },
+            listeners:  {
+                scope: this,
+                load: function(store, records, success){
+                    if (success) {
+                        deferred.resolve(records);
+                    } else {
+                        deferred.reject('Error loading ' + model_name + ' items');
+                    }
+               }
+           }
+        });
         return deferred.promise;
     },
     _fetchCollection: function(parent,children_field){
@@ -295,6 +328,15 @@
         return deferred.promise;
 
     },
+    _getAssociationFieldFor:function(child_type,parent_type){
+        if ( child_type == "defect" ) {
+            if ( parent_type == "testcase" ) {
+                return "TestCase";
+            }
+            return 'Requirement';
+        }
+        return null;
+    },
     _getParentFrom:function(child){
         var type = child.get('_type');
         if ( type == "hierarchicalrequirement" ) {
@@ -317,6 +359,9 @@
         
         if ( type == "defect" ) {
             var parent = child.get("Requirement");
+            if ( this.targetType == "TestFolder" || this.targetType == "TestCase") {
+                parent = child.get('TestCase');
+            }
             child.set('parent', parent);
             return parent;
         }
@@ -354,6 +399,10 @@
         
         if ( type == "testcase" ) {
             return ['TestFolder'];
+        }
+        
+        if ( type == "defect" ) {
+            return ['TestCase','Requirement'];
         }
         return null;
     },
@@ -499,7 +548,7 @@
     },
     _getFetchNames: function() {
         var base_field_names = ['ObjectID','_type','Name'];
-        var parent_field_names = ['Parent','PortfolioItem','Requirement','WorkProduct','TestFolder'];
+        var parent_field_names = ['Parent','PortfolioItem','Requirement','WorkProduct','TestFolder','TestCase'];
         var children_field_names = ['Children','Tasks','UserStories','TestCases'];
         
         var field_names = Ext.Array.merge(base_field_names,children_field_names);

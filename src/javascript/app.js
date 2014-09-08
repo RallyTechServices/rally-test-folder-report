@@ -123,6 +123,52 @@ Ext.define('CustomApp', {
             {
                 text: 'Verdicts',
                 dataIndex: 'LastVerdict'
+            },
+            {
+                text: '# Defects Total',
+                dataIndex: '__count_defects',
+                menuDisabled: true,
+                leaves_only: true,
+                calculator: function(item) {
+                    if ( item.get('_type') == 'defect' ) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            },
+            {
+                text: '# Defects Open',
+                dataIndex: '__count_defects_open',
+                menuDisabled: true,
+                leaves_only: true,
+                calculator: function(item) {
+                    if ( item.get('_type') == 'defect' ) {
+                        if ( item.get('State') !== 'Closed' ) {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                },
+                otherFields: ['State']
+            },
+            {
+                text: '# Defects Fixed',
+                dataIndex: '__count_defects_fixed',
+                menuDisabled: true,
+                leaves_only: true,
+                calculator: function(item) {
+                    if ( item.get('_type') == 'defect' ) {
+                        if ( item.get('State') == 'Closed' || item.get('State') == 'Fixed' ) {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                },
+                otherFields: ['State']
+            },
+            {
+                text: 'State',
+                dataIndex: 'State'
             }
         ];
         
