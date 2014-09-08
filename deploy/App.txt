@@ -3,11 +3,11 @@
 <head>
     <title>Test Folder Report</title>
     <!--  (c) 2014 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Mon Sep 08 2014 13:07:13 GMT-0700 (PDT) -->
+    <!--  Build Date: Mon Sep 08 2014 16:52:58 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Sep 08 2014 13:07:13 GMT-0700 (PDT)";
-        var CHECKSUM = 26859681629;
+        var APP_BUILD_DATE = "Mon Sep 08 2014 16:52:58 GMT-0700 (PDT)";
+        var CHECKSUM = 26932575921;
     </script>
     
     <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
@@ -1052,7 +1052,7 @@ Ext.define('CustomApp', {
     _nameRenderer: function(value,meta_data,record) {
         var display_value = record.get('Name');
         if ( record.get('FormattedID') ) {
-            var link_text = record.get('FormattedID') + ": " + value;
+            var link_text = Ext.util.Format.ellipsis(record.get('FormattedID') + ": " + value, 50, true);
             var url = Rally.nav.Manager.getDetailUrl( record );
             display_value = "<a target='_blank' href='" + url + "'>" + link_text + "</a>";
         }

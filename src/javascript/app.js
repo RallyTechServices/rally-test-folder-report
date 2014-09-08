@@ -177,7 +177,7 @@ Ext.define('CustomApp', {
     _nameRenderer: function(value,meta_data,record) {
         var display_value = record.get('Name');
         if ( record.get('FormattedID') ) {
-            var link_text = record.get('FormattedID') + ": " + value;
+            var link_text = Ext.util.Format.ellipsis(record.get('FormattedID') + ": " + value, 50, true);
             var url = Rally.nav.Manager.getDetailUrl( record );
             display_value = "<a target='_blank' href='" + url + "'>" + link_text + "</a>";
         }
