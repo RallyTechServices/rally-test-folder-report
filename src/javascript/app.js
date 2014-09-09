@@ -14,7 +14,8 @@ Ext.define('CustomApp', {
         container.removeAll();
         container.add({
             xtype:'insideouttree',
-            targetType:'TestFolder',
+            targetType:'TestCase',
+            targetQuery: '( TestFolder != "" )',
             columns: this._getColumns(),
             listeners: {
                 scope:this,
@@ -113,6 +114,21 @@ Ext.define('CustomApp', {
                 calculator: function(item) {
                     if ( item.get('_type') == 'testcase' && item.get('LastVerdict')) {
                         if ( item.get('LastVerdict') == "Fail") {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                },
+                otherFields: ['LastVerdict']
+            },
+            {
+                text: '# TCs Blocked',
+                dataIndex: '__count_blocked',
+                menuDisabled: true,
+                leaves_only: true,
+                calculator: function(item) {
+                    if ( item.get('_type') == 'testcase' && item.get('LastVerdict')) {
+                        if ( item.get('LastVerdict') == "Blocked") {
                             return 1;
                         }
                     }

@@ -37,6 +37,16 @@
      */
     targetType: 'HierarchicalRequirement',
     /**
+     * 
+     * @type Number targetChunk
+     * 
+     * When searching for parents of the target type, we pass along an array of
+     * ObjectIDs (so it's not one call per item and we get fewer calls to the server), 
+     * but the length of that get is limited.  Instead of calculating the best length,
+     * we just define a number of OIDs to shove into the call
+     */
+    targetChunk: 125,
+    /**
      * @cfg {Boolean} treeScopeDown
      * 
      * True to include searching for children and other descendants
@@ -187,13 +197,16 @@
             deferred = Ext.create('Deft.Deferred');
         }
         
+        var parent_oids = [];
+        
         var promises = [];
+        
         Ext.Object.each(parent_items,function(oid,parent){
             var type = parent.get('_type');
             var children_fields = this._getChildrenFieldsFor(type);
             
             if ( type == "testcase" ) {
-                promises.push(this._fetchChildrenForParent('defect',parent)); 
+                parent_oids.push(parent.get('ObjectID'));
             }
             
             if ( children_fields ) {
@@ -203,6 +216,17 @@
             }
         },this);
         
+        if ( parent_oids.length > 0 ) {
+            var number_of_oids = parent_oids.length;
+            if (number_of_oids > 0 ) {
+                for ( var i=0; i<number_of_oids; i+=this.targetChunk ) {
+                    var chunk_array = parent_oids.slice(i,i+this.targetChunk);
+                    promises.push(this._fetchByArrayOfValues('defect',chunk_array,"TestCase.ObjectID"));
+                }
+            }
+            
+        }
+            
         if (promises.length > 0) {
             Deft.Promise.all(promises).then({
                 scope: this,
@@ -305,8 +329,12 @@
         
         var promises = [];
         Ext.Object.each(parents_by_type,function(type,oids){
-            if (oids.length > 0 ) {
-                promises.push(this._fetchItemsByOIDArray(type,oids));
+            var number_of_oids = oids.length;
+            if (number_of_oids > 0 ) {
+                for ( var i=0; i<number_of_oids; i+=this.targetChunk ) {
+                    var chunk_array = oids.slice(i,i+this.targetChunk);
+                    promises.push(this._fetchItemsByOIDArray(type,chunk_array));
+                }
             }
         },this);
         
@@ -326,7 +354,6 @@
             deferred.resolve(fetched_items);
         }
         return deferred.promise;
-
     },
     _getAssociationFieldFor:function(child_type,parent_type){
         if ( child_type == "defect" ) {
@@ -434,6 +461,39 @@
             return ['TestFolder','TestCase']
         }
         return null;
+    },
+    _fetchByArrayOfValues:function(model_name,oids,field_name){
+        this.logger.log("_fetchByArrayOfValues (", model_name, ",", oids.length, ",", field_name ,")");
+        var deferred = Ext.create('Deft.Deferred');
+        var filters = Ext.create('Rally.data.wsapi.Filter',{property:field_name,value:oids[0]});
+        
+        for ( var i=1;i<oids.length;i++ ) {
+            filters = filters.or(Ext.create('Rally.data.wsapi.Filter',{
+                property:field_name,
+                value:oids[i]
+            }));
+        }
+        
+        Ext.create('Rally.data.wsapi.Store', {
+            autoLoad: true,
+            model: model_name,
+            fetch: this._getFetchNames(),
+            filters: filters,
+            context: {
+                project: null
+            },
+            listeners:  {
+                scope: this,
+                load: function(store, records, success){
+                    if (success) {
+                        deferred.resolve(records);
+                    } else {
+                        deferred.reject('Error loading ' + model_name + ' items');
+                    }
+               }
+           }
+        });
+        return deferred.promise;
     },
     _fetchItemsByOIDArray:function(model_name,oids){
         this.logger.log("_fetchItemsByOIDArray (", oids.length, ")");
