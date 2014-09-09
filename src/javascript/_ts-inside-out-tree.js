@@ -545,31 +545,39 @@
 
     _makeStoreAndShowGrid: function(ordered_items){
         this.logger.log('_makeStoreAndShowGrid',ordered_items);
-        var model_config = {
-            extend: 'TSTreeModel',
-            fields: this._getFetchNames()
-        };
-        Ext.define('TSTreeModelWithAdditions', model_config);
-        
-        var tree_store = Ext.create('Ext.data.TreeStore',{
-            model: TSTreeModelWithAdditions,
-            root: {
-                expanded: false,
-                children: ordered_items
-            }
-        });
-        
-        var tree = this.add({
-            xtype:'treepanel',
-            store: tree_store,
-            cls: 'rally-grid',
-            rootVisible: false,
-            enableColumnMove: true,
-            sortableColumns: false,
-            rowLines: true,
-            height: this.height,
-            columns: this.columns
-        });
+        if ( ordered_items.length == 0 ) {
+            this.add({
+                xtype:'container',
+                margin: 15,
+                html: 'No data found'
+            });
+        } else {
+            var model_config = {
+                extend: 'TSTreeModel',
+                fields: this._getFetchNames()
+            };
+            Ext.define('TSTreeModelWithAdditions', model_config);
+            
+            var tree_store = Ext.create('Ext.data.TreeStore',{
+                model: TSTreeModelWithAdditions,
+                root: {
+                    expanded: false,
+                    children: ordered_items
+                }
+            });
+            
+            var tree = this.add({
+                xtype:'treepanel',
+                store: tree_store,
+                cls: 'rally-grid',
+                rootVisible: false,
+                enableColumnMove: true,
+                sortableColumns: false,
+                rowLines: true,
+                height: this.height,
+                columns: this.columns
+            });
+        }
 
         this.fireEvent('aftertree',this,tree);
     },
