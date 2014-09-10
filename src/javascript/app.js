@@ -79,8 +79,8 @@ Ext.define('CustomApp', {
                 }
             },
             {
-                text: '# TCs Completed',
-                dataIndex: '__count_completed',
+                text: '# TCs Executed',
+                dataIndex: '__count_executed',
                 menuDisabled: true,
                 leaves_only: true,
                 calculator: function(item) {
