@@ -3,11 +3,11 @@
 <head>
     <title>Test Folder Report</title>
     <!--  (c) 2014 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Tue Sep 09 2014 19:01:42 GMT-0700 (PDT) -->
+    <!--  Build Date: Tue Sep 23 2014 15:06:15 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Sep 09 2014 19:01:42 GMT-0700 (PDT)";
-        var CHECKSUM = 31091987151;
+        var APP_BUILD_DATE = "Tue Sep 23 2014 15:06:15 GMT-0700 (PDT)";
+        var CHECKSUM = 33724126100;
     </script>
     
     <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
@@ -295,6 +295,38 @@ Ext.define('Rally.technicalservices.util.TreeBuilding', {
         }
         return calculator(item);
         
+    },
+    /**
+     * Given an array of root items, find nodes in the tree where field_name contains field_value
+     * and prune them
+     * 
+     * @param {} root_items
+     * @param {} field_name
+     * @param {} field_value
+     * @return {}
+     */
+    pruneByFieldValue: function(root_items,field_name,field_value){
+        Ext.Array.each(root_items,function(root_item){
+            this._removeByFieldValue(root_items,root_item,field_name,field_value);
+        },this);
+        return root_items;
+    },
+    _removeByFieldValue: function(parent_array,parent_item,field_name,field_value){
+        var tester = new RegExp(field_value);
+        
+        if ( parent_item ) {
+            var value = parent_item.get(field_name) || "";
+            if ( tester.test(value) ) {
+                Ext.Array.remove(parent_array,parent_item);
+            } else {
+                var kids = parent_item.get('children') || [];
+                if ( kids.length > 0 ) {
+                    Ext.Array.each(kids, function(kid){
+                        this._removeByFieldValue(kids,kid,field_name,field_value);
+                    },this);
+                }
+            }
+        }
     }
 });
 /*
@@ -344,7 +376,7 @@ Ext.define('Rally.technicalservices.util.TreeBuilding', {
      * but the length of that get is limited.  Instead of calculating the best length,
      * we just define a number of OIDs to shove into the call
      */
-    targetChunk: 125,
+    targetChunk: 70,
     /**
      * @cfg {Boolean} treeScopeDown
      * 
@@ -358,6 +390,9 @@ Ext.define('Rally.technicalservices.util.TreeBuilding', {
      */
     treeScopeUp: true,
 
+    pruneFieldName: null,
+    pruneFieldValue: null,
+    
     initComponent: function() {
         if ( this.columns.length == 0 ) { throw("Missing required setting: columns"); }
         
@@ -396,8 +431,15 @@ Ext.define('Rally.technicalservices.util.TreeBuilding', {
                         this.fireEvent('afterload',this);
 
                         var ordered_items = Rally.technicalservices.util.TreeBuilding.constructRootItems(all_unordered_items);
+                        
+                        if ( this.pruneFieldName && this.pruneFieldValue ) {
+                            ordered_items = Rally.technicalservices.util.TreeBuilding.pruneByFieldValue(ordered_items, this.pruneFieldName, this.pruneFieldValue);
+                        }
+                        
                         var calculated_items = this._doColumnCalculations(ordered_items);
+
                         var ordered_items_as_hashes = Rally.technicalservices.util.TreeBuilding.convertModelsToHashes(calculated_items);
+                        
                         this._makeStoreAndShowGrid(ordered_items_as_hashes);
                     },
                     failure:function(error_msg){ 
@@ -959,7 +1001,10 @@ Ext.define('CustomApp', {
             xtype:'insideouttree',
             targetType:'TestCase',
             targetQuery: '( TestFolder != "" )',
+            targetChunk: 70,
             columns: this._getColumns(),
+            pruneFieldName: 'Name',
+            pruneFieldValue: 'Archive',
             listeners: {
                 scope:this,
                 afterrender:function(){

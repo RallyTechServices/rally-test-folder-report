@@ -16,7 +16,10 @@ Ext.define('CustomApp', {
             xtype:'insideouttree',
             targetType:'TestCase',
             targetQuery: '( TestFolder != "" )',
+            targetChunk: 70,
             columns: this._getColumns(),
+            pruneFieldName: 'Name',
+            pruneFieldValue: 'Archive',
             listeners: {
                 scope:this,
                 afterrender:function(){

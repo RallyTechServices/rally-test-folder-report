@@ -45,7 +45,7 @@
      * but the length of that get is limited.  Instead of calculating the best length,
      * we just define a number of OIDs to shove into the call
      */
-    targetChunk: 125,
+    targetChunk: 70,
     /**
      * @cfg {Boolean} treeScopeDown
      * 
@@ -59,6 +59,9 @@
      */
     treeScopeUp: true,
 
+    pruneFieldName: null,
+    pruneFieldValue: null,
+    
     initComponent: function() {
         if ( this.columns.length == 0 ) { throw("Missing required setting: columns"); }
         
@@ -97,8 +100,15 @@
                         this.fireEvent('afterload',this);
 
                         var ordered_items = Rally.technicalservices.util.TreeBuilding.constructRootItems(all_unordered_items);
+                        
+                        if ( this.pruneFieldName && this.pruneFieldValue ) {
+                            ordered_items = Rally.technicalservices.util.TreeBuilding.pruneByFieldValue(ordered_items, this.pruneFieldName, this.pruneFieldValue);
+                        }
+                        
                         var calculated_items = this._doColumnCalculations(ordered_items);
+
                         var ordered_items_as_hashes = Rally.technicalservices.util.TreeBuilding.convertModelsToHashes(calculated_items);
+                        
                         this._makeStoreAndShowGrid(ordered_items_as_hashes);
                     },
                     failure:function(error_msg){ 

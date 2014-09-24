@@ -155,5 +155,37 @@ Ext.define('Rally.technicalservices.util.TreeBuilding', {
         }
         return calculator(item);
         
+    },
+    /**
+     * Given an array of root items, find nodes in the tree where field_name contains field_value
+     * and prune them
+     * 
+     * @param {} root_items
+     * @param {} field_name
+     * @param {} field_value
+     * @return {}
+     */
+    pruneByFieldValue: function(root_items,field_name,field_value){
+        Ext.Array.each(root_items,function(root_item){
+            this._removeByFieldValue(root_items,root_item,field_name,field_value);
+        },this);
+        return root_items;
+    },
+    _removeByFieldValue: function(parent_array,parent_item,field_name,field_value){
+        var tester = new RegExp(field_value);
+        
+        if ( parent_item ) {
+            var value = parent_item.get(field_name) || "";
+            if ( tester.test(value) ) {
+                Ext.Array.remove(parent_array,parent_item);
+            } else {
+                var kids = parent_item.get('children') || [];
+                if ( kids.length > 0 ) {
+                    Ext.Array.each(kids, function(kid){
+                        this._removeByFieldValue(kids,kid,field_name,field_value);
+                    },this);
+                }
+            }
+        }
     }
 });
