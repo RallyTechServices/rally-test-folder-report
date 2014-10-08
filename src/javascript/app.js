@@ -4,10 +4,21 @@ Ext.define('CustomApp', {
     logger: new Rally.technicalservices.Logger(),
     items: [
         {xtype:'container',itemId:'message_box'},
+        {xtype:'container',itemId:'button_box',margin: 5},
         {xtype:'container',itemId:'display_box'},
         {xtype:'tsinfolink'}
     ],
     launch: function() {
+        this.button = this.down('#button_box').add({
+            xtype:'rallybutton',
+            itemId:'save_button',
+            text:'Save As CSV',
+            disabled: true,
+            scope: this,
+            handler: function() {
+                this._makeCSV();
+            }
+        });
         this._addTree(this.down('#display_box'));
     },
     _addTree: function(container){
@@ -31,8 +42,10 @@ Ext.define('CustomApp', {
                 afterload:function(){
                     this.setLoading('Building tree...');
                 },
-                aftertree:function(){
+                aftertree:function(tree_container,tree){
+                    this.tree = tree;
                     this.setLoading(false);
+                    this.button.setDisabled(false);
                 }
             }
         });
@@ -263,5 +276,43 @@ Ext.define('CustomApp', {
             }
         });
         return deferred.promise;
+    },
+    _makeCSV: function() {
+        var file_name = "test_folder_report.csv";
+        
+        var file_content = [];
+        var header_line = [];
+        Ext.Array.each(this._getColumns(), function(field){
+            header_line.push(field.text);
+        });
+        file_content.push(header_line.join(','));
+        
+        var store = this.tree.getStore();
+        
+        this.logger.log("tree store", store);
+        var root = store.getRootNode();
+        this.logger.log("Root", root);
+        
+        var csv = this._getCSVFromNode(root,this._getColumns());
+        
+        file_content.push(csv);
+        
+        var blob = new Blob([file_content.join("\r\n")],{type:'text/csv;charset=utf-8'});
+        saveAs(blob,file_name);
+    },
+    _getCSVFromNode: function(node,columns){
+        var csv = [];
+        Ext.Array.each(columns,function(column){
+            var index = column.dataIndex;
+            csv.push(node.data[index]);
+        });
+        
+        var csv_string = csv.join('","');
+        var csv_string = '"' + csv_string + '"\r\n';
+
+        Ext.Array.each(node.childNodes,function(child_node){
+            csv_string += this._getCSVFromNode(child_node,columns);
+        },this);
+        return csv_string;
     }
 });
