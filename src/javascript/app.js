@@ -162,7 +162,7 @@ Ext.define('CustomApp', {
                 leaves_only: true,
                 calculator: function(item) {
                     if ( item.get('_type') == 'defect' ) {
-                        if ( item.get('State') !== 'Closed' ) {
+                        if (( item.get('State') == 'Submitted' ) || ( item.get('State') == 'Open' ) || ( item.get('State') == 'In Progress' )){
                             return 1;
                         }
                     }
@@ -177,7 +177,37 @@ Ext.define('CustomApp', {
                 leaves_only: true,
                 calculator: function(item) {
                     if ( item.get('_type') == 'defect' ) {
-                        if ( item.get('State') == 'Closed' || item.get('State') == 'Fixed' ) {
+                        if ( item.get('State') == 'Fixed' ) {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                },
+                otherFields: ['State']
+            },
+            {
+                text: '# Defects RFT',
+                dataIndex: '__count_defects_rft',
+                menuDisabled: true,
+                leaves_only: true,
+                calculator: function(item) {
+                    if ( item.get('_type') == 'defect' ) {
+                        if ( item.get('State') == 'Ready for Testing' ) {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                },
+                otherFields: ['State']
+            },
+            {
+                text: '# Defects Closed',
+                dataIndex: '__count_defects_closed',
+                menuDisabled: true,
+                leaves_only: true,
+                calculator: function(item) {
+                    if ( item.get('_type') == 'defect' ) {
+                        if ( item.get('State') == 'Closed' ) {
                             return 1;
                         }
                     }

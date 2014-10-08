@@ -3,11 +3,11 @@
 <head>
     <title>Test Folder Report</title>
     <!--  (c) 2014 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Tue Sep 23 2014 15:06:15 GMT-0700 (PDT) -->
+    <!--  Build Date: Tue Oct 07 2014 18:16:28 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Sep 23 2014 15:06:15 GMT-0700 (PDT)";
-        var CHECKSUM = 33724126100;
+        var APP_BUILD_DATE = "Tue Oct 07 2014 18:16:28 GMT-0700 (PDT)";
+        var CHECKSUM = 34948246689;
     </script>
     
     <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
@@ -1147,7 +1147,7 @@ Ext.define('CustomApp', {
                 leaves_only: true,
                 calculator: function(item) {
                     if ( item.get('_type') == 'defect' ) {
-                        if ( item.get('State') !== 'Closed' ) {
+                        if (( item.get('State') == 'Submitted' ) || ( item.get('State') == 'Open' ) || ( item.get('State') == 'In Progress' )){
                             return 1;
                         }
                     }
@@ -1162,7 +1162,37 @@ Ext.define('CustomApp', {
                 leaves_only: true,
                 calculator: function(item) {
                     if ( item.get('_type') == 'defect' ) {
-                        if ( item.get('State') == 'Closed' || item.get('State') == 'Fixed' ) {
+                        if ( item.get('State') == 'Fixed' ) {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                },
+                otherFields: ['State']
+            },
+            {
+                text: '# Defects RFT',
+                dataIndex: '__count_defects_rft',
+                menuDisabled: true,
+                leaves_only: true,
+                calculator: function(item) {
+                    if ( item.get('_type') == 'defect' ) {
+                        if ( item.get('State') == 'Ready for Testing' ) {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                },
+                otherFields: ['State']
+            },
+            {
+                text: '# Defects Closed',
+                dataIndex: '__count_defects_closed',
+                menuDisabled: true,
+                leaves_only: true,
+                calculator: function(item) {
+                    if ( item.get('_type') == 'defect' ) {
+                        if ( item.get('State') == 'Closed' ) {
                             return 1;
                         }
                     }
