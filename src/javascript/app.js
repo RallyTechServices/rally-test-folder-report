@@ -209,7 +209,7 @@ Ext.define('CustomApp', {
             {
                 text: 'Verdicts',
                 dataIndex: 'LastVerdict'
-            },
+            }/*,
             {
                 text: '# Defects Total',
                 dataIndex: '__count_defects',
@@ -285,7 +285,7 @@ Ext.define('CustomApp', {
             {
                 text: 'State',
                 dataIndex: 'State'
-            }
+            }*/
         ];
         
         return columns;

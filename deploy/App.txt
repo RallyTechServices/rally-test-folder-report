@@ -3,11 +3,11 @@
 <head>
     <title>Test Folder Report</title>
     <!--  (c) 2014 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Oct 30 2014 19:54:10 GMT-0700 (PDT) -->
+    <!--  Build Date: Thu Oct 30 2014 19:58:16 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Oct 30 2014 19:54:10 GMT-0700 (PDT)";
-        var CHECKSUM = 74663933486;
+        var APP_BUILD_DATE = "Thu Oct 30 2014 19:58:16 GMT-0700 (PDT)";
+        var CHECKSUM = 74671625376;
     </script>
     
     <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
@@ -1614,7 +1614,7 @@ Ext.define('CustomApp', {
             {
                 text: 'Verdicts',
                 dataIndex: 'LastVerdict'
-            },
+            }/*,
             {
                 text: '# Defects Total',
                 dataIndex: '__count_defects',
@@ -1690,7 +1690,7 @@ Ext.define('CustomApp', {
             {
                 text: 'State',
                 dataIndex: 'State'
-            }
+            }*/
         ];
         
         return columns;
