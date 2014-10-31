@@ -9,6 +9,8 @@ Ext.define('CustomApp', {
         {xtype:'tsinfolink'}
     ],
     launch: function() {
+        this.start_folder_oid = this.getSetting('start_folder_oid');
+        
         this.button = this.down('#button_box').add({
             xtype:'rallybutton',
             itemId:'save_button',
@@ -19,14 +21,62 @@ Ext.define('CustomApp', {
                 this._makeCSV();
             }
         });
-        this._addTree(this.down('#display_box'));
+        this.down('#button_box').add({
+            xtype:'rallybutton',
+            itemId:'pick_button',
+            text:'Choose Folder',
+            disabled: false,
+            scope: this,
+            handler: function() {
+                this._pickFolder();
+            }
+        });
+
+        this.onSettingsUpdate(this.getSettings());
+    },
+    _pickFolder: function() {
+        Ext.create('Rally.ui.dialog.SolrArtifactChooserDialog', {
+            artifactTypes: ['testfolder'],
+            autoShow: true,
+            height: 250,
+            title: 'Choose Test Folder',
+            listeners: {
+                artifactchosen: function(dialog,selected_record){
+                    var start_folder_oid = selected_record.get('ObjectID');
+                    this.logger.log("Selected ", selected_record.get('Name'), " - ", start_folder_oid);
+                    this._setTopFolder(start_folder_oid);
+                },
+                scope: this
+            }
+         });
+    },
+    _setTopFolder: function(start_folder_oid) {
+        this.start_folder_oid = start_folder_oid;
+        
+        this.updateSettingsValues({
+            scope: this,
+            settings: {
+                start_folder_oid: start_folder_oid
+            },
+            success: function() {
+                this.onSettingsUpdate(this.getSettings());
+            }
+        });
     },
     _addTree: function(container){
         container.removeAll();
+        this.logger.log("Start folder OID:", this.start_folder_oid);
+        
+        var target_query = "( ObjectID > 0 )";
+        if ( this.start_folder_oid ) {
+            target_query = '( ObjectID = "' + this.start_folder_oid + '" )';
+        }
         container.add({
             xtype:'insideouttree',
-            targetType:'TestCase',
-            targetQuery: '( TestFolder != "" )',
+//            targetType:'TestCase',
+//            targetQuery: '( TestFolder != "" )',
+            targetType:'TestFolder',
+            targetQuery: target_query,
             targetChunk: 70,
             columns: this._getColumns(),
             pruneFieldName: 'Name',
@@ -44,11 +94,15 @@ Ext.define('CustomApp', {
                 },
                 aftertree:function(tree_container,tree){
                     this.tree = tree;
+                    this.tree.on('selectionchange',this._setSelected,this);
                     this.setLoading(false);
                     this.button.setDisabled(false);
                 }
             }
         });
+    },
+    _setSelected: function(tree,selected) {
+        this.selected = selected[0];
     },
     _getAvailableTreeHeight: function() {
         var body = Ext.getBody();
@@ -291,7 +345,12 @@ Ext.define('CustomApp', {
         
         this.logger.log("tree store", store);
         var root = store.getRootNode();
-        this.logger.log("Root", root);
+        
+        if ( this.selected ) { 
+            root = this.selected;
+        }
+        
+        this.logger.log('root',root);
         
         var csv = this._getCSVFromNode(root,this._getColumns());
         
@@ -314,5 +373,17 @@ Ext.define('CustomApp', {
             csv_string += this._getCSVFromNode(child_node,columns);
         },this);
         return csv_string;
+    },
+    
+    isExternal: function(){
+      return typeof(this.getAppId()) == 'undefined';
+    },
+    //onSettingsUpdate:  Override
+    onSettingsUpdate: function (settings){
+        //Build and save column settings...this means that we need to get the display names and multi-list
+        this.logger.log('onSettingsUpdate',settings);
+        
+        var type = this.getSetting('type');
+        this._addTree(this.down('#display_box'));
     }
 });
