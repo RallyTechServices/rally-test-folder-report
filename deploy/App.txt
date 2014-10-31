@@ -3,11 +3,11 @@
 <head>
     <title>Test Folder Report</title>
     <!--  (c) 2014 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Thu Oct 30 2014 19:42:29 GMT-0700 (PDT) -->
+    <!--  Build Date: Thu Oct 30 2014 19:54:10 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Oct 30 2014 19:42:29 GMT-0700 (PDT)";
-        var CHECKSUM = 74560488657;
+        var APP_BUILD_DATE = "Thu Oct 30 2014 19:54:10 GMT-0700 (PDT)";
+        var CHECKSUM = 74663933486;
     </script>
     
     <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
@@ -1440,13 +1440,13 @@ Ext.define('CustomApp', {
         this.onSettingsUpdate(this.getSettings());
     },
     _pickFolder: function() {
-        Ext.create('Rally.ui.dialog.SolrArtifactChooserDialog', {
+        //Ext.create('Rally.ui.dialog.SolrArtifactChooserDialog', {
+        Ext.create('Rally.ui.dialog.ChooserDialog',{
             artifactTypes: ['testfolder'],
             autoShow: true,
-            height: 250,
             title: 'Choose Test Folder',
             listeners: {
-                artifactchosen: function(dialog,selected_record){
+                artifactchosen: function(selected_record){
                     var start_folder_oid = selected_record.get('ObjectID');
                     this.logger.log("Selected ", selected_record.get('Name'), " - ", start_folder_oid);
                     this._setTopFolder(start_folder_oid);

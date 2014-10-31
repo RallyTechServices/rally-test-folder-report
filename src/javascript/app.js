@@ -35,13 +35,13 @@ Ext.define('CustomApp', {
         this.onSettingsUpdate(this.getSettings());
     },
     _pickFolder: function() {
-        Ext.create('Rally.ui.dialog.SolrArtifactChooserDialog', {
+        //Ext.create('Rally.ui.dialog.SolrArtifactChooserDialog', {
+        Ext.create('Rally.ui.dialog.ChooserDialog',{
             artifactTypes: ['testfolder'],
             autoShow: true,
-            height: 250,
             title: 'Choose Test Folder',
             listeners: {
-                artifactchosen: function(dialog,selected_record){
+                artifactchosen: function(selected_record){
                     var start_folder_oid = selected_record.get('ObjectID');
                     this.logger.log("Selected ", selected_record.get('Name'), " - ", start_folder_oid);
                     this._setTopFolder(start_folder_oid);
